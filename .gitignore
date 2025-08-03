@@ -1,0 +1,51 @@
+# Archivos y directorios de compilación
+**/bin/
+**/obj/
+**/Debug/
+**/Release/
+
+# Configuración local del usuario
+*.user
+*.suo
+*.userosscache
+*.userprefs
+.vscode/
+
+# Configuración de herramientas
+*.log
+*.tlog
+*.ide
+
+# Archivos temporales
+*.tmp
+*.temp
+*.cache
+*.csproj.user
+*.rsuser
+*.dotCover
+
+# Archivos de paquetes
+*.nupkg
+*.snupkg
+
+# Base de datos local o archivos de SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Sistema de publicación
+.publish/
+
+# Archivos de seguridad y secretos
+secrets.json
+.env
+
+# Otros archivos generados
+*.pdb
+*.dll
+*.exe
+*.out
+*.json.swp
+*.swp
+*.bak
+*.cache

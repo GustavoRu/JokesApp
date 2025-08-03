@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: takehomeapi_sqlserver
+    environment:
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - ACCEPT_EULA=Y
+    ports:
+      - "14334:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
+
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: takehomeapi_api
+  #   depends_on:
+  #     - sqlserver
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=TakeHomeDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
+  #   ports:
+  #     - "5104:8080"
+  #     - "5105:443"
+  #   restart: unless-stopped
+
+volumes:
+  sqlserver_data: 
