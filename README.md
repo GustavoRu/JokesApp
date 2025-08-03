@@ -1,6 +1,6 @@
-# Take Home API Scaffolding
+# Take Home API jokes app
 
-Este proyecto es un scaffolding para APIs REST en .NET 8 con Entity Framework Core y arquitectura limpia.
+Este proyecto es un jokes app para APIs REST en .NET 8 con Entity Framework Core y arquitectura limpia.
 
 ## Estructura del Proyecto
 
