@@ -2,6 +2,7 @@ using BackendApi.Users.Services;
 using BackendApi.Users.DTOs;
 using BackendApi.Users.Repositories;
 using BackendApi.Users.Models;
+
 namespace BackendApi.Users.Services
 {
     public class UserService : IUserService
@@ -14,14 +15,17 @@ namespace BackendApi.Users.Services
             _userRepository = userRepository;
             Errors = new List<string>();
         }
+
         public async Task<IEnumerable<UserDto>> GetAll()
         {
             var users = await _userRepository.GetAll();
             return users.Select(u => new UserDto
             {
-                UserId = u.UserId,
-                Username = u.Username,
-                Email = u.Email
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                Role = u.Role,
+                IsActive = u.IsActive
             });
         }
 
@@ -32,9 +36,11 @@ namespace BackendApi.Users.Services
             {
                 return new UserDto
                 {
-                    UserId = user.UserId,
-                    Username = user.Username,
-                    Email = user.Email
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.Role,
+                    IsActive = user.IsActive
                 };
             }
             return null;
@@ -42,23 +48,23 @@ namespace BackendApi.Users.Services
 
         public async Task<UserDto> Create(UserInsertDto userInsertDto)
         {
-            
             var user = new UserModel
             {
-                Username = userInsertDto.Username,
+                Name = userInsertDto.Username, // Mantenemos Username en el DTO de inserción por ahora
                 Email = userInsertDto.Email,
                 PasswordHash = userInsertDto.Password,
             };
 
-            
             await _userRepository.Create(user);
             await _userRepository.Save();
 
             return new UserDto
             {
-                UserId = user.UserId,
-                Username = user.Username,
-                Email = user.Email
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role,
+                IsActive = user.IsActive
             };
         }
 
@@ -67,18 +73,19 @@ namespace BackendApi.Users.Services
             var user = await _userRepository.GetById(id);
             if (user != null)
             {
-                user.Username = userUpdateDto.Username;
+                user.Name = userUpdateDto.Username; // Mantenemos Username en el DTO de actualización por ahora
                 user.Email = userUpdateDto.Email;
                 user.IsActive = userUpdateDto.IsActive;
                 _userRepository.Update(user);
                 await _userRepository.Save();
                 return new UserDto
                 {
-                    UserId = user.UserId,
-                    Username = user.Username,
-                    Email = user.Email
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.Role,
+                    IsActive = user.IsActive
                 };
-
             }
             return null;
         }
@@ -92,9 +99,11 @@ namespace BackendApi.Users.Services
                 await _userRepository.Save();
                 return new UserDto
                 {
-                    UserId = user.UserId,
-                    Username = user.Username,
-                    Email = user.Email
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.Role,
+                    IsActive = user.IsActive
                 };
             }
             return null;

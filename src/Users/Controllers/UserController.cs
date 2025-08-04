@@ -3,6 +3,7 @@ using BackendApi.Users.DTOs;
 using BackendApi.Users.Services;
 using FluentValidation;
 using BackendApi.Users.Validators;
+
 namespace BackendApi.Users.Controllers
 {
     [Route("api/[controller]")]
@@ -48,13 +49,14 @@ namespace BackendApi.Users.Controllers
             }
             var userDto = await _userService.Create(userInsertDto);
 
-            return CreatedAtAction(nameof(GetById), new { id = userDto.UserId }, new UserDto
+            return CreatedAtAction(nameof(GetById), new { id = userDto.Id }, new UserDto
             {
-                UserId = userDto.UserId,
-                Username = userDto.Username,
-                Email = userDto.Email
+                Id = userDto.Id,
+                Name = userDto.Name,
+                Email = userDto.Email,
+                Role = userDto.Role,
+                IsActive = userDto.IsActive
             });
-
         }
 
         [HttpPut("{id}")]
@@ -87,6 +89,5 @@ namespace BackendApi.Users.Controllers
             }
             return Ok(userDto);
         }    
-
     }
 }
