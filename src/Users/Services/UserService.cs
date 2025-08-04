@@ -109,6 +109,19 @@ namespace BackendApi.Users.Services
             return null;
         }
 
+        public async Task<UserModel> GetUserByEmailAsync(string email)
+        {
+            var users = _userRepository.Search(u => u.Email == email);
+            return await Task.FromResult(users.FirstOrDefault());
+        }
+
+        public async Task<UserModel> CreateUserAsync(UserModel user)
+        {
+            await _userRepository.Create(user);
+            await _userRepository.Save();
+            return user;
+        }
+
         public bool Validate(UserInsertDto userInsertDto)
         {
             if(_userRepository.Search(b => b.Email == userInsertDto.Email).Count() > 0){
