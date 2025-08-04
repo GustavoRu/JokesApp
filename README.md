@@ -1,4 +1,4 @@
-# Take Home API jokes app
+# JokesApp API
 
 Este proyecto es un jokes app para APIs REST en .NET 8 con Entity Framework Core y arquitectura limpia.
 
@@ -21,7 +21,7 @@ Este proyecto es un jokes app para APIs REST en .NET 8 con Entity Framework Core
 │   └── BackendApiTests/       # Proyecto de pruebas
 │       ├── UnitTests/         # Pruebas unitarias
 │       └── IntegrationTests/  # Pruebas de integración
-├── TakeHomeScaffolding.sln    # Archivo de solución
+├── JokesApp.sln    # Archivo de solución
 ├── Dockerfile                 # Configuración para Docker
 ├── docker-compose.yml         # Configuración de Docker Compose
 └── .gitignore                 # Exclusiones para Git
@@ -49,7 +49,7 @@ Este proyecto es un jokes app para APIs REST en .NET 8 con Entity Framework Core
 1. Clone el repositorio
    ```
    git clone <url-del-repositorio>
-   cd TakeHomeScaffolding
+   cd JokesApp
    ```
 
 2. Restaure los paquetes
@@ -81,7 +81,7 @@ Este proyecto es un jokes app para APIs REST en .NET 8 con Entity Framework Core
 La aplicación está configurada para utilizar SQL Server. La cadena de conexión predeterminada es:
 
 ```
-Server=localhost,14334;Database=TakeHomeDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
+Server=localhost,14334;Database=JokesDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
 ```
 
 En el entorno Docker, la cadena de conexión se configura automáticamente para usar el contenedor de SQL Server.
