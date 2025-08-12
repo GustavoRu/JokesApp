@@ -1,3 +1,4 @@
+using System.Text;
 using BackendApi.Data;
 using BackendApi.Users.Repositories;
 using BackendApi.Users.Services;
@@ -6,23 +7,24 @@ using BackendApi.Users.Validators;
 using BackendApi.Auth.Services;
 using FluentValidation;
 using BackendApi.Users.Models;
-using BackendApi.Users.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<GoogleAuthService>();
 
 //repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 //entity framework
-builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); });
+builder.Services.AddDbContext<ApplicationDbContext>(options => { 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); 
+});
 
 //validators
 builder.Services.AddScoped<IValidator<UserInsertDto>, UserInsertValidator>();
@@ -45,7 +47,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

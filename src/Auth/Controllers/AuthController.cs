@@ -10,16 +10,24 @@ using Microsoft.AspNetCore.Mvc;
 namespace BackendApi.Auth.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IJwtService _jwtService;
+        private readonly GoogleAuthService _googleAuthService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IUserService userService, IJwtService jwtService)
+        public AuthController(
+            IUserService userService,
+            IJwtService jwtService,
+            GoogleAuthService googleAuthService,
+            ILogger<AuthController> logger)
         {
             _userService = userService;
             _jwtService = jwtService;
+            _googleAuthService = googleAuthService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -60,23 +68,63 @@ namespace BackendApi.Auth.Controllers
             return Ok(new { token });
         }
 
-        [Authorize]
-        [HttpGet("me")]
-        public async Task<ActionResult<UserModel>> GetCurrentUser()
+        [HttpGet("external/google-login")]
+        public IActionResult GoogleLogin()
         {
-            var email = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(email))
-            {
-                return Unauthorized();
-            }
+            var authorizationUrl = _googleAuthService.GetAuthorizationUrl();
+            _logger.LogInformation($"Redirecting to Google authorization URL: {authorizationUrl}");
+            return Redirect(authorizationUrl);
+        }
 
-            var user = await _userService.GetUserByEmailAsync(email);
-            if (user == null)
+        [HttpGet("external/callback")]
+        public async Task<IActionResult> GoogleCallback([FromQuery] string? code, [FromQuery] string? error)
+        {
+            try
             {
-                return NotFound();
-            }
+                if (!string.IsNullOrEmpty(error))
+                {
+                    _logger.LogError($"Google OAuth error: {error}");
+                    return BadRequest($"Google authentication error: {error}");
+                }
 
-            return Ok(user);
+                if (string.IsNullOrEmpty(code))
+                {
+                    _logger.LogError("No authorization code received from Google");
+                    return BadRequest("No authorization code received");
+                }
+
+                // Obtener información del usuario de Google
+                var googleUser = await _googleAuthService.GetUserInfoAsync(code);
+
+                // Buscar o crear usuario en nuestra base de datos
+                var user = await _userService.GetUserByEmailAsync(googleUser.Email);
+                if (user == null)
+                {
+                    user = new UserModel
+                    {
+                        Email = googleUser.Email,
+                        Name = googleUser.Name,
+                        PasswordHash = Convert.ToBase64String(Guid.NewGuid().ToByteArray()), // Contraseña aleatoria
+                        Role = "user",
+                        IsActive = true
+                    };
+
+                    user = await _userService.CreateUserAsync(user);
+                }
+
+                // Generar JWT
+                var token = _jwtService.GenerateToken(user);
+
+                // Redirigir con el token
+                var redirectUrl = $"/auth-success?token={token}";
+                _logger.LogInformation($"Authentication successful, redirecting to: {redirectUrl}");
+                return Redirect(redirectUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during Google authentication");
+                return BadRequest($"Authentication failed: {ex.Message}");
+            }
         }
 
         private string HashPassword(string password)
