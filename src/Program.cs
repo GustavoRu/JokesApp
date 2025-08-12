@@ -5,6 +5,7 @@ using BackendApi.Users.Services;
 using BackendApi.Users.DTOs;
 using BackendApi.Users.Validators;
 using BackendApi.Auth.Services;
+using BackendApi.Jokes.Services;
 using FluentValidation;
 using BackendApi.Users.Models;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<GoogleAuthService>();
+builder.Services.AddScoped<IJokeService, JokeService>();
+builder.Services.AddScoped<IExternalJokeService, ExternalJokeService>();
+
+// Configure HttpClient for external APIs
+builder.Services.AddHttpClient();
 
 //repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
