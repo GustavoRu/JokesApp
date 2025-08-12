@@ -71,10 +71,21 @@ namespace BackendApi.Auth.Services
                     throw new Exception($"Failed to get user info. Status: {userInfoResponse.StatusCode}");
                 }
 
-                var userInfo = await JsonSerializer.DeserializeAsync<GoogleUserInfo>(
-                    await userInfoResponse.Content.ReadAsStreamAsync());
+                var content = await userInfoResponse.Content.ReadAsStringAsync();
+                _logger.LogInformation($"Google user info response: {content}");
+                
+                var userInfo = JsonSerializer.Deserialize<GoogleUserInfo>(content, new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                });
 
-                return userInfo ?? throw new Exception("Failed to deserialize user info");
+                if (userInfo == null)
+                {
+                    throw new Exception("Failed to deserialize user info");
+                }
+
+                _logger.LogInformation($"Parsed user info - Email: {userInfo.Email}, Name: {userInfo.Name}");
+                return userInfo;
             }
             catch (Exception ex)
             {

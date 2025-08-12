@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 using BackendApi.Auth.DTOs;
 using BackendApi.Auth.Services;
 using BackendApi.Users.Models;
@@ -68,38 +69,59 @@ namespace BackendApi.Auth.Controllers
             return Ok(new { token });
         }
 
+        /// <summary>
+        /// Inicia el flujo de autenticación con Google
+        /// </summary>
+        /// <returns>URL de autorización de Google y estado para validación</returns>
+        /// <summary>
+        /// Inicia el flujo de autenticación con Google
+        /// </summary>
         [HttpGet("external/google-login")]
-        public IActionResult GoogleLogin()
+        public ActionResult<object> GoogleLogin()
         {
             var authorizationUrl = _googleAuthService.GetAuthorizationUrl();
-            _logger.LogInformation($"Redirecting to Google authorization URL: {authorizationUrl}");
-            return Redirect(authorizationUrl);
+            _logger.LogInformation($"Generated Google authorization URL: {authorizationUrl}");
+            return Ok(new { 
+                url = authorizationUrl,
+                message = @"1. Abre esta URL en una nueva pestaña
+2. Completa el login con Google
+3. Cuando te redirija, copia SOLO el parámetro 'code' de la URL (está entre 'code=' y '&scope=')
+4. Usa ese código en el endpoint POST /api/auth/external/google-callback"
+            });
         }
 
-        [HttpGet("external/callback")]
-        public async Task<IActionResult> GoogleCallback([FromQuery] string? code, [FromQuery] string? error)
+        /// <summary>
+        /// Completa el flujo de autenticación con Google y devuelve el token JWT
+        /// </summary>
+        [HttpPost("external/google-callback")]
+        public async Task<ActionResult<object>> GoogleCallback([FromBody] GoogleCallbackDto callbackDto)
         {
             try
             {
-                if (!string.IsNullOrEmpty(error))
-                {
-                    _logger.LogError($"Google OAuth error: {error}");
-                    return BadRequest($"Google authentication error: {error}");
-                }
-
-                if (string.IsNullOrEmpty(code))
+                if (string.IsNullOrEmpty(callbackDto.Code))
                 {
                     _logger.LogError("No authorization code received from Google");
-                    return BadRequest("No authorization code received");
+                    return BadRequest(new { error = "No authorization code received" });
                 }
 
+                // Decodificar el código si viene con codificación URL
+                var decodedCode = HttpUtility.UrlDecode(callbackDto.Code.Trim());
+
                 // Obtener información del usuario de Google
-                var googleUser = await _googleAuthService.GetUserInfoAsync(code);
+                var googleUser = await _googleAuthService.GetUserInfoAsync(decodedCode);
+                _logger.LogInformation($"Received Google user info - Email: {googleUser.Email}, Name: {googleUser.Name}");
+
+                if (string.IsNullOrEmpty(googleUser.Email))
+                {
+                    _logger.LogError("Google user info does not contain email");
+                    return BadRequest(new { error = "No se pudo obtener el email del usuario de Google" });
+                }
 
                 // Buscar o crear usuario en nuestra base de datos
                 var user = await _userService.GetUserByEmailAsync(googleUser.Email);
                 if (user == null)
                 {
+                    _logger.LogInformation($"Creating new user with email: {googleUser.Email}");
                     user = new UserModel
                     {
                         Email = googleUser.Email,
@@ -111,19 +133,35 @@ namespace BackendApi.Auth.Controllers
 
                     user = await _userService.CreateUserAsync(user);
                 }
+                else
+                {
+                    _logger.LogInformation($"Found existing user with email: {user.Email}");
+                }
 
                 // Generar JWT
                 var token = _jwtService.GenerateToken(user);
 
-                // Redirigir con el token
-                var redirectUrl = $"/auth-success?token={token}";
-                _logger.LogInformation($"Authentication successful, redirecting to: {redirectUrl}");
-                return Redirect(redirectUrl);
+                return Ok(new { 
+                    token = token,
+                    user = new {
+                        id = user.Id,
+                        email = user.Email,
+                        name = user.Name,
+                        role = user.Role
+                    },
+                    message = @"Autenticación exitosa. Sigue estos pasos:
+1. Copia el token que aparece arriba
+2. Haz click en el botón 'Authorize' en la parte superior
+3. En el campo que aparece, escribe: Bearer [espacio] y pega el token
+4. Ejemplo: Bearer eyJhbGci...
+5. Click en 'Authorize' y luego en 'Close'
+6. ¡Listo! Ahora puedes usar los endpoints protegidos"
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during Google authentication");
-                return BadRequest($"Authentication failed: {ex.Message}");
+                return BadRequest(new { error = $"Authentication failed: {ex.Message}" });
             }
         }
 
