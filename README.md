@@ -1,97 +1,66 @@
-# JokesApp API
+# JokesApp
 
-Este proyecto es un jokes app para APIs REST en .NET 8 con Entity Framework Core y arquitectura limpia.
+## Configuración del Proyecto
 
-## Estructura del Proyecto
+### Requisitos Previos
+- .NET 7.0 o superior
+- SQL Server (o Docker para SQL Server)
+- Una cuenta de Google Cloud Platform para OAuth
 
-```
-/
-├── src/                       # Código fuente de la aplicación
-│   ├── Controllers/           # Controladores de la API
-│   ├── Models/                # Modelos/Entidades de dominio
-│   ├── Data/                  # Capa de acceso a datos
-│   │   ├── Repositories/      # Implementaciones de repositorios
-│   │   ├── DbContext/         # Contextos de Entity Framework
-│   │   └── Configurations/    # Configuraciones de Entity Framework
-│   ├── Services/              # Servicios de negocio
-│   ├── DTOs/                  # Objetos de transferencia de datos
-│   ├── Program.cs             # Punto de entrada
-│   └── appsettings.json       # Configuración
-├── tests/                     # Pruebas
-│   └── BackendApiTests/       # Proyecto de pruebas
-│       ├── UnitTests/         # Pruebas unitarias
-│       └── IntegrationTests/  # Pruebas de integración
-├── JokesApp.sln    # Archivo de solución
-├── Dockerfile                 # Configuración para Docker
-├── docker-compose.yml         # Configuración de Docker Compose
-└── .gitignore                 # Exclusiones para Git
+### Configuración de Desarrollo
+
+1. Clona el repositorio
+```bash
+git clone https://github.com/GustavoRu/JokesApp.git
+cd JokesApp
 ```
 
-## Tecnologías Utilizadas
-
-- .NET 8
-- ASP.NET Core Web API
-- Entity Framework Core
-- FluentValidation
-- xUnit para pruebas
-- Swagger/OpenAPI
-- Docker & Docker Compose
-
-## Requisitos
-
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Docker](https://www.docker.com/get-started) (opcional)
-
-## Instrucciones de Inicio
-
-### Desarrollo Local
-
-1. Clone el repositorio
-   ```
-   git clone <url-del-repositorio>
-   cd JokesApp
-   ```
-
-2. Restaure los paquetes
-   ```
-   dotnet restore
-   ```
-
-3. Ejecute la aplicación
-   ```
-   cd src
-   dotnet run
-   ```
-
-4. Navegue a https://localhost:7091/swagger para ver la documentación de la API
-
-### Usando Docker
-
-1. Construya y ejecute los contenedores
-   ```
-   docker-compose up --build
-   ```
-
-2. Navegue a http://localhost:5104/swagger para ver la documentación de la API
-
-   > La base de datos SQL Server estará disponible en localhost:14334
-
-## Configuración de Base de Datos
-
-La aplicación está configurada para utilizar SQL Server. La cadena de conexión predeterminada es:
-
-```
-Server=localhost,14334;Database=JokesDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
+2. Configura los User Secrets para desarrollo local:
+```bash
+cd src
+dotnet user-secrets init
 ```
 
-En el entorno Docker, la cadena de conexión se configura automáticamente para usar el contenedor de SQL Server.
-
-## Pruebas
-
+3. Configura los siguientes secretos:
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "tu-connection-string"
+dotnet user-secrets set "Jwt:Key" "tu-jwt-key-de-al-menos-32-caracteres"
+dotnet user-secrets set "Google:ClientId" "tu-google-client-id"
+dotnet user-secrets set "Google:ClientSecret" "tu-google-client-secret"
 ```
-dotnet test
+
+### Configuración de Producción
+
+Para producción, configura las siguientes variables de entorno:
+
+- `ConnectionStrings__DefaultConnection`
+- `Jwt__Key`
+- `Google__ClientId`
+- `Google__ClientSecret`
+
+### Ejecutar el Proyecto
+
+1. Restaura los paquetes NuGet:
+```bash
+dotnet restore
 ```
 
-## Licencia
+2. Ejecuta las migraciones:
+```bash
+dotnet ef database update
+```
 
-Este proyecto está licenciado bajo la licencia MIT. 
+3. Inicia el proyecto:
+```bash
+dotnet run
+```
+
+## Seguridad
+
+Este proyecto utiliza:
+- User Secrets para desarrollo local
+- Variables de entorno para producción
+- JWT para autenticación
+- Google OAuth para login externo
+
+NO comitees información sensible en los archivos de configuración. Usa los mecanismos de secretos apropiados mencionados arriba.

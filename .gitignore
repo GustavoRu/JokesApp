@@ -1,51 +1,50 @@
-# Archivos y directorios de compilación
-**/bin/
-**/obj/
-**/Debug/
-**/Release/
-
-# Configuración local del usuario
-*.user
-*.suo
-*.userosscache
-*.userprefs
-.vscode/
-
-# Configuración de herramientas
-*.log
-*.tlog
-*.ide
-
-# Archivos temporales
-*.tmp
-*.temp
-*.cache
-*.csproj.user
-*.rsuser
-*.dotCover
-
-# Archivos de paquetes
-*.nupkg
-*.snupkg
-
-# Base de datos local o archivos de SQLite
-*.db
-*.sqlite
-*.sqlite3
-
-# Sistema de publicación
-.publish/
-
-# Archivos de seguridad y secretos
-secrets.json
-.env
-
-# Otros archivos generados
-*.pdb
-*.dll
-*.exe
-*.out
-*.json.swp
+# .NET Core
 *.swp
-*.bak
-*.cache
+*.*~
+project.lock.json
+.DS_Store
+*.pyc
+nupkg/
+
+# Visual Studio Code
+.vscode
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# User secrets
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/appsettings.Staging.json
+
+# Docker
+.docker/
+
+# Logs
+logs/
+*.log
